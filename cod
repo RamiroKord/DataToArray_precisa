@@ -1,0 +1,44 @@
+#include <SD.h>
+#include <SPI.h>
+
+#define SDCARD_CS_PIN 4
+
+const int MAX_UIDS = 100; // Número máximo de UIDs.
+String uids[MAX_UIDS];
+int uidCount = 0; // Quantos UIDs são armazenados na array.
+
+bool initializeSD() {
+    if (!SD.begin(SDCARD_CS_PIN)) {
+        Serial.println("Erro no inicio do SD");
+        return false;
+    }
+    return true;
+}
+
+void loadUIDsFromSD() {
+    File dataFile = SD.open("data.txt");
+    if (dataFile) {
+        while (dataFile.available() && uidCount < MAX_UIDS) {
+            uids[uidCount] = dataFile.readStringUntil('\n');
+            uidCount++;
+        }
+        dataFile.close();
+    } else {
+        Serial.println("Erro ao abrir data.txt");
+    }
+}
+
+void setup() {
+    Serial.begin(9600);
+    if (initializeSD()) {
+        loadUIDsFromSD();
+        Serial.println("UIDs carregadas:");
+        for (int i = 0; i < uidCount; i++) {
+            Serial.println(uids[i]);
+        }
+    }
+}
+
+void loop() {
+    // Your main code here
+}
